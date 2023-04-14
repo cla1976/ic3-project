@@ -1,90 +1,131 @@
 from django.db import models
-from django.contrib.auth.models import AbstractBaseUser
-from django.contrib.auth.models import PermissionsMixin
-from django.contrib.auth.models import BaseUserManager
+from django.utils import timezone
+
+DEVICES = (('1', 'Device 1'),
+           ('2', 'Device 2'),
+           ('3', 'Device 3'))
+
+CARDS = (('normalCard', 'Normal'),
+         ('patrolCard', 'Mantenimiento'),
+         ('hijackCard', 'Hijack'),
+         ('superCard', 'Super'),
+         ('dismissingCard', 'Destituir'),
+         ('emergencyCard', 'Emergencia'))
+
+PROFILETYPE = (('normal', 'Normal'),
+               ('visitor', 'Visitante'),
+               ('blackList', 'Bloqueado'))
+
+SUBJECTS = (('análisis matematico', 'Análisis matemático'),
+            ('física', 'Física'),
+            ('química', 'Química'))
+
+CAREERS = (('computer engineering', 'Computer Engineering'),
+           ('mechatronics', 'Mechatronics'),
+           ('bioinformatics', 'Bioinformatics'))
+
+GENDER = (('male', 'Hombre'),
+          ('female', 'Mujer'),
+          ('unknown', 'Sin especificar'))
+
+ROOMS = (('1', 'Room 1'),
+         ('2', 'Room 2'),
+         ('3', 'Room 3'))
+
+HOURS = (('8', '8:00'),
+         ('9', '9:00'),
+         ('10', '10:00'),
+         ('11', '11:00'),
+         ('12', '12:00'),
+         ('13', '13:00'),
+         ('14', '14:00'),
+         ('15', '15:00'),
+         ('16', '16:00'),
+         ('17', '17:00'),
+         ('18', '18:00'),
+         ('19', '19:00'),
+         ('20', '20:00'),
+         ('21', '21:00'),
+         ('22', '22:00'),
+         ('23', '23:00'))
+
+VERIFYMODE = (('cardOrFace', 'Tarjeta o cara'),
+              ('cardOrfaceOrPw', 'Tarjeta, cara o clave'),
+              ('cardOrPw', 'Tarjeta o clave'),
+              ('card', 'Tarjeta'),
+              ('cardOrFace', 'Cara o clave'),
+              ('face', 'Cara'))
 
 
-DEVICES = ((1, 'Device 1'),
-           (2, 'Device 2'),
-           (3, 'Device 3'))
-
-# Create your models here.
-class UserProfileManager(BaseUserManager):
-    def create_user(
-        self, 
-        email, 
-        first_name, 
-        last_name,
-        profile_type,
-        password=None,
-        **extra_fields
-    ):
-        if not email:
-            raise ValueError('User must have an email!')
-
-        email = self.normalize_email(email)
-        user = self.model(
-            email=email,
-            first_name=first_name,
-            last_name=last_name,
-            profile_type=profile_type,
-            **extra_fields
-        )
-
-        user.set_password(password)
-        user.save(using=self._db)
-
-        return user
-
-    def create_superuser(
-        self, 
-        email,
-        password,
-    ):
-        user = self.create_user(
-            email,
-            'superadmin',
-            'superadmin',
-            UserProfileType.objects.get(description = 'SUPERADMIN'),
-            password
-        )
-
-        user.is_superuser = True
-        user.is_staff = True
-        user.save(using=self._db)
-
-        return user
-
-class UserProfile(AbstractBaseUser, PermissionsMixin):
+class UserProfile(models.Model):
+    user_device_id = models.IntegerField(unique=True, blank=True)
+    first_name = models.CharField(max_length=100, null=True)
+    last_name = models.CharField(max_length=100, null=True)
     email = models.EmailField(max_length=255, unique=True)
-    first_name = models.TextField(max_length=100, null=True)
-    last_name = models.TextField(max_length=100, null=True)
+    gender = models.CharField(max_length=10, choices=GENDER)
+    userVerifyMode = models.CharField(max_length=30, choices=VERIFYMODE, blank=True)
+    doorRight = models.CharField(max_length=100)
+    doorNo = models.CharField(max_length=100)
+    planTemplateNo = models.CharField(max_length=100)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
-    profile_type = models.ForeignKey('UserProfileType', on_delete=models.CASCADE, null=True)
-    date_created = models.DateTimeField(auto_now=True, editable=False)
-    last_updated = models.DateTimeField(auto_now=True, editable=False)
+    profile_type = models.CharField(max_length=10, choices=PROFILETYPE)
+    date_created = models.DateTimeField(editable=False, default=timezone.now)
+    last_updated = models.DateTimeField(editable=False, default=timezone.now)
     dni = models.CharField(max_length=100, unique=True, null=True)
-    device_id = models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')
-    address = models.TextField(max_length=100, null=True)
-    phone = models.TextField(max_length=100, null=True, blank=True)
-    emergency_phone = models.TextField(max_length=100, null=True)
-    devices_total = models.CharField(max_length=100, choices=DEVICES)
-    begin_time = models.DateTimeField(editable=True, null=True)
-    end_time = models.DateTimeField(editable=True, null=True)
+    address = models.CharField(max_length=100, null=True)
+    phone = models.CharField(max_length=100, null=True, blank=True)
+    emergency_phone = models.CharField(max_length=100, null=True)
+    beginTime = models.DateTimeField(editable=True)
+    endTime = models.DateTimeField(editable=True)
+    fileImage = models.FileField(upload_to='user_profile_api/images/', blank=True)
+    card = models.CharField(max_length=20, blank=True)
+    cardType = models.CharField(max_length=20, blank=True, choices=CARDS)
+    timeType = models.CharField(max_length=10, default='local')
+    
 
-    objects = UserProfileManager()
+    def __str__(self):
+        text = "{0} {1} ({2} {3})"
+        return text.format(self.first_name, self.last_name, self.dni, self.user_device_id)
 
     USERNAME_FIELD = 'email'
 
-class UserProfileType(models.Model):
-    description = models.TextField(max_length=100)
+
+
+
+class Device(models.Model):
+    device = models.CharField(max_length=50)
+    date_purchased = models.DateField(editable=True)
+    is_active = models.BooleanField(default=False)
+    is_synchronized = models.BooleanField(default=True)
+    users = models.ManyToManyField(UserProfile, related_name='devices', blank=True)
+
 
     def __str__(self):
-        return self.description
+        text = "{0}"
+        return text.format(self.device)
 
-class DeviceIds(models.Model):
-    id2 = models.BigIntegerField(null=True)
- 
+
+
+
+
+class Room(models.Model):
+    room = models.CharField(max_length=100)
+    location = models.CharField(max_length=100)
+    device = models.OneToOneField(Device, on_delete=models.CASCADE)
+
     def __str__(self):
-        return self.id
+        text = "{0} ({1})"
+        return text.format(self.room, self.location)
+
+
+class Subject(models.Model):
+    subject = models.CharField(max_length=100, choices=SUBJECTS)
+    room = models.ForeignKey(Room, on_delete=models.CASCADE)
+    career = models.CharField(max_length=100, choices=CAREERS)
+    begin_hour = models.CharField(choices=HOURS, max_length=20)
+    end_hour = models.CharField(choices=HOURS, max_length=20)
+
+    def __str__(self):
+        text = "{0}"
+        return text.format(self.subject)
