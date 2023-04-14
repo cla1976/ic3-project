@@ -52,6 +52,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'user_profile_api.middleware.Middleware',
+    'user_profile_api.middleware.SpecificPageMiddleware',
 ]
 
 ROOT_URLCONF = 'users_admin.urls'
@@ -59,7 +61,7 @@ ROOT_URLCONF = 'users_admin.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],
+        'DIRS': [],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -109,9 +111,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'es-ar'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/Argentina/Buenos_Aires'
 
 USE_I18N = True
 
@@ -121,16 +123,14 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
-STATICFILES_DIRS = [
-    BASE_DIR/'static'
-]
+STATIC_URL = 'static/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-AUTH_USER_MODEL = 'user_profile_api.UserProfile'
+#AUTH_USER_MODEL = 'user_profile_api.UserProfile'
 
 # Variable to identify environment 'TEST' or 'PROD' (if 'TEST' use mocked requests)
 ENVIRONMENT = 'TEST'
@@ -139,7 +139,7 @@ print('Environment:', ENVIRONMENT)
 
 # Gateway & Device Settings
 GATEWAY_IP = utils.get_secret('GATEWAY_IP')
-GATEWAY_PORT = '8085'
+GATEWAY_PORT = '85'
 GATEWAY_USER = 'admin'
 GATEWAY_PASSWORD = utils.get_secret('GATEWAY_PASSWORD')
 DEVICE_UUID = 'D76C6D74-4B20-4BB1-8C4C-B51244DF3026'
