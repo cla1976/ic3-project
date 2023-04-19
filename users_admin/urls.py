@@ -15,8 +15,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from user_profile_api.views import video_feed, video, enviar_solicitud
 
 urlpatterns = [
+    path('enviar_solicitud/', enviar_solicitud, name='enviar_solicitud'),
+    path('video_feed/', video_feed, name='video_feed'),
+    path('video/', video, name='video'),
     path('', admin.site.urls),
-    path('api/', include('user_profile_api.urls'))
 ]
