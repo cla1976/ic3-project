@@ -12,13 +12,17 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.csrf import requires_csrf_token
 import requests
 from django.shortcuts import render
-from users_admin.settings import BASE_URL, DEVICE_UUID, GATEWAY_USER, GATEWAY_PASSWORD, GATEWAY_IP2, GATEWAY_RTSP
+from users_admin.settings import BASE_URL, DEVICE_UUID, GATEWAY_USER, GATEWAY_PASSWORD, GATEWAY_IP2, GATEWAY_IP, GATEWAY_RTSP, GATEWAY_PORT
 from user_profile_api.urls_services import (
     URL_STREAM_101,
+    URL_DOOR_1,
 )
 import datetime
 
 rtsp_url = f"rtsp://{GATEWAY_USER}:{GATEWAY_PASSWORD}@{GATEWAY_IP2}:{GATEWAY_RTSP}{URL_STREAM_101}"
+base_url = BASE_URL
+door_url = f"{URL_DOOR_1}?format=xml&devIndex={DEVICE_UUID}"
+full_url = f"{base_url}{door_url}"
 
 def add_timestamp(frame):
     now = datetime.datetime.now()
@@ -56,7 +60,8 @@ def video_stream(request):
 
 
 def enviar_solicitud(request):
-    url = "http://192.168.1.247:85/ISAPI/AccessControl/RemoteControl/door/1?format=xml&devIndex=D76C6D74-4B20-4BB1-8C4C-B51244DF3026"
+    print(full_url)
+    url = full_url
     payload = "<RemoteControlDoor xmlns=\"http://www.isapi.org/ver20/XMLSchema\" version=\"2.0\"><cmd>open</cmd></RemoteControlDoor>"
     headers = {
         'Content-Type': 'application/xml'
