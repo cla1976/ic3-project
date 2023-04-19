@@ -21,7 +21,7 @@ from requests.auth import HTTPDigestAuth
 from user_profile_api.models import UserProfile
 from user_profile_api.services import get_default_user_device_id
 
-mockeo = True
+mockeo = False
 
 @receiver(pre_save, sender=UserProfile)
 def send_user_data(sender, instance, **kwargs):
