@@ -16,8 +16,11 @@ from users_admin.settings import BASE_URL, DEVICE_UUID, GATEWAY_USER, GATEWAY_PA
 from user_profile_api.urls_services import (
     URL_STREAM_101,
     URL_DOOR_1,
+    URL_SEARCH_USER,
 )
 import datetime
+import json, base64
+from django.http import JsonResponse
 
 rtsp_url = f"rtsp://{GATEWAY_USER}:{GATEWAY_PASSWORD}@{GATEWAY_IP2}:{GATEWAY_RTSP}{URL_STREAM_101}"
 base_url = BASE_URL
@@ -38,7 +41,7 @@ def gen_frames():
             break
         else:
             frame = imutils.resize(frame, width=640)
-            frame = add_timestamp(frame)  # Agregar la marca de tiempo al marco
+            frame = add_timestamp(frame)  
             ret, buffer = cv2.imencode('.jpg', frame)
             frame = buffer.tobytes()
             yield (b'--frame\r\n'
@@ -49,22 +52,39 @@ def video_feed(request):
 
 
 def video(request):
-    return render(request, "custom/video.html")
-
-def video_stream(request):
-    context = {}
-    # ...
-    response = webrtc(request)
-    context['sdp'] = response.content.get('answer', {}).get('sdp')
-    return render(request, 'video_stream.html', context=context)
+    return render(request, "custom/video/video.html")
 
 
-def enviar_solicitud(request):
-    print(full_url)
+def video_open_door(request):
     url = full_url
     payload = "<RemoteControlDoor xmlns=\"http://www.isapi.org/ver20/XMLSchema\" version=\"2.0\"><cmd>open</cmd></RemoteControlDoor>"
     headers = {
         'Content-Type': 'application/xml'
     }
-    response = requests.put(url, headers=headers, data=payload, auth=requests.auth.HTTPDigestAuth('admin', 'unraf1234'))
-    return render(request, 'custom/video.html', {'respuesta': response.text})
+    response = requests.put(url, headers=headers, data=payload, auth=requests.auth.HTTPDigestAuth(GATEWAY_USER, GATEWAY_PASSWORD))
+    return HttpResponse('')
+
+
+def get_users(request):
+    base_url = BASE_URL
+    record_url = f"{URL_SEARCH_USER}?format=json&devIndex={DEVICE_UUID}"
+    full_url = f"{base_url}{record_url}"
+    payload = json.dumps({
+        "UserInfoSearchCond": {
+        "searchID": "0",
+        "searchResultPosition": 0,
+        "maxResults": 1500
+        }
+        })
+    headers = {
+    'Content-Type': 'application/json'
+    }
+
+    response = requests.post(full_url, headers=headers, data=payload, auth=requests.auth.HTTPDigestAuth(GATEWAY_USER, GATEWAY_PASSWORD))
+    users = response.json()
+    return JsonResponse({'users': users['UserInfoSearch']['UserInfo']})
+
+def show_users(request):
+    return render(request, "custom/show_users/show_users.html")
+
+#{'users': users['UserInfoSearch']['UserInfo']})

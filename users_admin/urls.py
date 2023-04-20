@@ -15,11 +15,16 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from user_profile_api.views import video_feed, video, enviar_solicitud
+from user_profile_api.views import video_feed, video, video_open_door, show_users, get_users
 
 urlpatterns = [
-    path('enviar_solicitud/', enviar_solicitud, name='enviar_solicitud'),
-    path('video_feed/', video_feed, name='video_feed'),
+    #URLs de funcionalidades
+    path('video/open_door/', video_open_door, name='video_open_door'),
+    path('video/feed/', video_feed, name='video_feed'),
+    path('show_users/get_users/', get_users, name='get_users'),
+
+    #URLs de páginas para acceder
     path('video/', video, name='video'),
+    path('show_users/', show_users, name='show_users'),
     path('', admin.site.urls),
 ]

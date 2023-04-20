@@ -255,9 +255,15 @@
                                 
                             {% endif %}
                             <li class="nav-item">
-                                <a href="http://127.0.0.1:8000/video/" class="nav-link">
+                                <a href="{% url 'video' %}" class="nav-link">
                                     <i class="nav-icon fa fa-camera"></i>
                                     <p>Live feed</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{% url 'show_users' %}" class="nav-link">
+                                    <i class="nav-icon fa fa-address-book"></i>
+                                    <p>Show users device</p>
                                 </a>
                             </li>
                         </ul>
